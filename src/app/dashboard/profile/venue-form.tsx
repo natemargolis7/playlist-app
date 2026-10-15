@@ -9,7 +9,7 @@ import type { Venue } from "@/lib/types";
 export function VenueForm({ venue }: { venue: Venue }) {
   const [state, action] = useActionState<FormState, FormData>(updateVenue, {});
   return (
-    <form action={action} className="card max-w-2xl space-y-4">
+    <form action={action} className="card max-w-2xl space-y-5 p-6 sm:p-8">
       <div>
         <label className="label" htmlFor="name">Venue name</label>
         <input className="input" id="name" name="name" defaultValue={venue.name} required />

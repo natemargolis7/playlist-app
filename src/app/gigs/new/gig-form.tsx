@@ -8,7 +8,7 @@ import { SubmitButton } from "@/components/submit-button";
 export function GigForm() {
   const [state, action] = useActionState<FormState, FormData>(createGig, {});
   return (
-    <form action={action} className="card max-w-2xl space-y-4">
+    <form action={action} className="card max-w-2xl space-y-5 p-6 sm:p-8">
       <input type="hidden" name="tz_offset" value={new Date().getTimezoneOffset()} suppressHydrationWarning />
       <div>
         <label className="label" htmlFor="title">Title</label>
@@ -30,7 +30,10 @@ export function GigForm() {
         </div>
         <div>
           <label className="label" htmlFor="pay">Pay (USD)</label>
-          <input className="input" id="pay" name="pay" inputMode="decimal" required />
+          <div className="relative">
+            <span className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-sm text-muted">$</span>
+            <input className="input pl-7" id="pay" name="pay" inputMode="decimal" placeholder="300" required />
+          </div>
         </div>
       </div>
       <div>
@@ -38,7 +41,7 @@ export function GigForm() {
         <input className="input" id="genres" name="genres" placeholder="jazz, soul" />
       </div>
       <FormMessage {...state} />
-      <SubmitButton>Post gig</SubmitButton>
+      <SubmitButton pendingText="Posting…">Post gig</SubmitButton>
     </form>
   );
 }

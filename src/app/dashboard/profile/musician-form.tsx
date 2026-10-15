@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import Link from "next/link";
+import { ExternalLink, Link2, Paintbrush, User } from "lucide-react";
 import { updateMusician, type FormState } from "@/app/dashboard/actions";
 import { FormMessage } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
@@ -19,8 +20,8 @@ export function MusicianForm({ musician }: { musician: Musician }) {
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
       <form action={action} className="space-y-6">
-        <section className="card space-y-4">
-          <h2 className="font-semibold">Basics</h2>
+        <section className="card space-y-4 p-6">
+          <h2 className="flex items-center gap-2 text-lg font-bold"><User className="h-5 w-5 text-brand" /> Basics</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Stage name">
               <input className="input" name="stage_name" defaultValue={musician.stage_name}
@@ -62,8 +63,8 @@ export function MusicianForm({ musician }: { musician: Musician }) {
           </label>
         </section>
 
-        <section className="card space-y-4">
-          <h2 className="font-semibold">Look & feel</h2>
+        <section className="card space-y-4 p-6">
+          <h2 className="flex items-center gap-2 text-lg font-bold"><Paintbrush className="h-5 w-5 text-brand" /> Look &amp; feel</h2>
           <Field label="Accent color">
             <div className="flex flex-wrap items-center gap-2">
               {PRESET_COLORS.map((c) => (
@@ -85,8 +86,8 @@ export function MusicianForm({ musician }: { musician: Musician }) {
           </Field>
         </section>
 
-        <section className="card space-y-4">
-          <h2 className="font-semibold">Links & media</h2>
+        <section className="card space-y-4 p-6">
+          <h2 className="flex items-center gap-2 text-lg font-bold"><Link2 className="h-5 w-5 text-brand" /> Links &amp; media</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {(["website", "instagram", "spotify", "youtube", "soundcloud", "bandcamp"] as const).map((k) => (
               <Field key={k} label={k[0].toUpperCase() + k.slice(1)}>
@@ -99,16 +100,18 @@ export function MusicianForm({ musician }: { musician: Musician }) {
           </Field>
         </section>
 
-        <div className="flex items-center gap-3">
+        <div className="sticky bottom-4 z-10 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card/90 p-3 shadow-lg backdrop-blur">
           <SubmitButton>Save profile</SubmitButton>
-          <Link href={`/musicians/${musician.slug}`} className="btn-outline">View public profile</Link>
+          <Link href={`/musicians/${musician.slug}`} className="btn-ghost">
+            <ExternalLink className="h-4 w-4" /> View public profile
+          </Link>
+          <div className="w-full sm:ml-auto sm:w-auto"><FormMessage {...state} /></div>
         </div>
-        <FormMessage {...state} />
       </form>
 
-      <aside className="space-y-2 lg:sticky lg:top-4 lg:self-start">
+      <aside className="space-y-2 lg:sticky lg:top-24 lg:self-start">
         <p className="text-xs font-semibold uppercase tracking-wide text-muted">Live preview</p>
-        <div className="overflow-hidden rounded-xl border border-border bg-card">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xl shadow-brand/5">
           <ProfileHeader musician={preview} compact />
         </div>
       </aside>
