@@ -13,7 +13,7 @@ A marketplace that connects live musicians with paid gigs. Built with Next.js (A
 ## Setup
 
 1. Create a Supabase project.
-2. Apply the schema: either `supabase db push` with the Supabase CLI, or paste `supabase/migrations/20261012000000_init.sql` into the SQL editor.
+2. Apply the schema: either `supabase db push` with the Supabase CLI, or paste each file in `supabase/migrations/` into the SQL editor, oldest first. `20261020000000_media_storage.sql` creates the `media` storage bucket used for photo uploads.
 3. Copy `.env.example` to `.env.local` and fill in your project URL and anon key.
 4. `npm install && npm run dev`, then open http://localhost:3000.
 

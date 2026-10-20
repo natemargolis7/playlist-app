@@ -7,6 +7,10 @@ import { updateMusician, type FormState } from "@/app/dashboard/actions";
 import { FormMessage } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 import { ProfileHeader } from "@/components/profile-header";
+import { Combobox } from "@/components/combobox";
+import { ImageDropzone } from "@/components/image-dropzone";
+import { MultiSelect } from "@/components/multi-select";
+import { GENRES, INSTRUMENTS, LOCATIONS } from "@/lib/options";
 import type { Musician } from "@/lib/types";
 
 const PRESET_COLORS = ["#7c3aed", "#db2777", "#ea580c", "#16a34a", "#0891b2", "#2563eb", "#1c1917"];
@@ -41,21 +45,29 @@ export function MusicianForm({ musician }: { musician: Musician }) {
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Location">
-              <input className="input" name="location" defaultValue={musician.location ?? ""}
-                onChange={(e) => set({ location: e.target.value })} />
+              <Combobox name="location" options={LOCATIONS} defaultValue={musician.location ?? ""}
+                placeholder="Start typing a city" onChange={(location) => set({ location })} />
             </Field>
             <Field label="Typical rate (USD per gig)">
-              <input className="input" name="rate" inputMode="decimal"
-                defaultValue={musician.rate_cents != null ? musician.rate_cents / 100 : ""} />
-            </Field>
-            <Field label="Genres" hint="Comma separated">
-              <input className="input" name="genres" defaultValue={musician.genres.join(", ")}
-                onChange={(e) => set({ genres: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} />
-            </Field>
-            <Field label="Instruments" hint="Comma separated">
-              <input className="input" name="instruments" defaultValue={musician.instruments.join(", ")} />
+              <div className="relative">
+                <span className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-sm text-muted">$</span>
+                <input className="input pl-7" name="rate" inputMode="decimal" placeholder="300"
+                  defaultValue={musician.rate_cents != null ? musician.rate_cents / 100 : ""}
+                  onChange={(e) => {
+                    const n = Number(e.target.value.replace(/[$,]/g, ""));
+                    set({ rate_cents: e.target.value.trim() && Number.isFinite(n) ? Math.round(n * 100) : null });
+                  }} />
+              </div>
             </Field>
           </div>
+          <Field label="Genres" hint="Pick from the list or type your own and press Enter.">
+            <MultiSelect name="genres" options={GENRES} defaultValue={musician.genres} max={8}
+              placeholder="Search genres…" onChange={(genres) => set({ genres })} />
+          </Field>
+          <Field label="Instruments">
+            <MultiSelect name="instruments" options={INSTRUMENTS} defaultValue={musician.instruments}
+              placeholder="Search instruments…" onChange={(instruments) => set({ instruments })} />
+          </Field>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" name="available" defaultChecked={musician.available}
               onChange={(e) => set({ available: e.target.checked })} />
@@ -76,14 +88,16 @@ export function MusicianForm({ musician }: { musician: Musician }) {
                 onChange={(e) => set({ accent_color: e.target.value })} className="h-8 w-12 cursor-pointer" />
             </div>
           </Field>
-          <Field label="Photo URL">
-            <input className="input" name="avatar_url" type="url" defaultValue={musician.avatar_url ?? ""}
-              onChange={(e) => set({ avatar_url: e.target.value || null })} />
-          </Field>
-          <Field label="Banner image URL">
-            <input className="input" name="banner_url" type="url" defaultValue={musician.banner_url ?? ""}
-              onChange={(e) => set({ banner_url: e.target.value || null })} />
-          </Field>
+          <div className="grid gap-5 sm:grid-cols-[auto_1fr]">
+            <Field label="Profile photo">
+              <ImageDropzone name="avatar_url" userId={musician.id} shape="round" defaultUrl={musician.avatar_url}
+                hint="Square works best." onChange={(avatar_url) => set({ avatar_url })} />
+            </Field>
+            <Field label="Banner image">
+              <ImageDropzone name="banner_url" userId={musician.id} defaultUrl={musician.banner_url}
+                hint="Wide images (about 3:1) look best." onChange={(banner_url) => set({ banner_url })} />
+            </Field>
+          </div>
         </section>
 
         <section className="card space-y-4 p-6">

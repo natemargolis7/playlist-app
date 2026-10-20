@@ -4,6 +4,8 @@ import { useActionState } from "react";
 import { createGig, type FormState } from "@/app/gigs/actions";
 import { FormMessage } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
+import { MultiSelect } from "@/components/multi-select";
+import { GENRES } from "@/lib/options";
 
 export function GigForm() {
   const [state, action] = useActionState<FormState, FormData>(createGig, {});
@@ -37,8 +39,8 @@ export function GigForm() {
         </div>
       </div>
       <div>
-        <label className="label" htmlFor="genres">Genres</label>
-        <input className="input" id="genres" name="genres" placeholder="jazz, soul" />
+        <span className="label">Genres</span>
+        <MultiSelect name="genres" options={GENRES} max={5} placeholder="What should the act play?" />
       </div>
       <FormMessage {...state} />
       <SubmitButton pendingText="Posting…">Post gig</SubmitButton>
