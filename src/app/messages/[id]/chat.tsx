@@ -34,20 +34,31 @@ export function Chat({
   // Live updates: append messages from the other side as they arrive.
   useEffect(() => {
     const supabase = createClient();
-    const channel = supabase
-      .channel(`messages:${applicationId}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages", filter: `application_id=eq.${applicationId}` },
-        (payload) => {
-          const msg = payload.new as Message;
-          setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
-          if (msg.sender_id !== userId) markRead(applicationId);
-        },
-      )
-      .subscribe();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let cancelled = false;
+
+    (async () => {
+      // Realtime must connect as the signed-in user, or RLS hides every message from it.
+      const { data } = await supabase.auth.getSession();
+      if (data.session) await supabase.realtime.setAuth(data.session.access_token);
+      if (cancelled) return;
+      channel = supabase
+        .channel(`messages:${applicationId}`)
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "messages", filter: `application_id=eq.${applicationId}` },
+          (payload) => {
+            const msg = payload.new as Message;
+            setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
+            if (msg.sender_id !== userId) markRead(applicationId);
+          },
+        )
+        .subscribe();
+    })();
+
     return () => {
-      supabase.removeChannel(channel);
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
     };
   }, [applicationId, userId]);
 
