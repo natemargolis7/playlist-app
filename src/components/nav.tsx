@@ -1,11 +1,16 @@
 import Link from "next/link";
-import { LayoutDashboard, LogOut, Menu, Plus } from "lucide-react";
+import { LayoutDashboard, LogOut, Menu, MessagesSquare, Plus } from "lucide-react";
 import { getSession } from "@/lib/session";
 import { Logo } from "./logo";
 import { NavLinks } from "./nav-links";
 
 export async function Nav() {
-  const { profile } = await getSession();
+  const { supabase, profile } = await getSession();
+  let unread = 0;
+  if (profile) {
+    const { data } = await supabase.rpc("inbox");
+    unread = ((data ?? []) as { unread: number }[]).reduce((n, r) => n + r.unread, 0);
+  }
 
   const account = profile ? (
     <>
@@ -14,6 +19,14 @@ export async function Nav() {
           <Plus className="h-4 w-4" /> Post a gig
         </Link>
       )}
+      <Link href="/messages" className="btn-ghost relative">
+        <MessagesSquare className="h-4 w-4" /> Messages
+        {unread > 0 && (
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-fill px-1.5 text-xs font-bold text-white">
+            {unread > 99 ? "99+" : unread}
+          </span>
+        )}
+      </Link>
       <Link href="/dashboard" className="btn-ghost">
         <LayoutDashboard className="h-4 w-4" /> Dashboard
       </Link>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarDays, Clock, Inbox, MapPin, Wallet } from "lucide-react";
+import { ArrowLeft, CalendarDays, Clock, Inbox, MapPin, MessageCircle, Wallet } from "lucide-react";
 import { getSession } from "@/lib/session";
 import { formatDate, formatMoney } from "@/lib/format";
 import type { Application, Gig, Musician, Venue } from "@/lib/types";
@@ -116,8 +116,11 @@ export default async function GigPage({ params }: { params: Promise<{ id: string
                       <input type="hidden" name="gig_id" value={gig.id} />
                       <button name="status" value="accepted" className="btn">Accept</button>
                       <button name="status" value="declined" className="btn-outline">Decline</button>
-                      <Link href={`/musicians/${a.musicians.slug}`} className="btn-ghost ml-auto">View profile</Link>
+                      <Link href={`/messages/${a.id}`} className="btn-ghost ml-auto"><MessageCircle className="h-4 w-4" /> Message</Link>
                     </form>
+                  )}
+                  {!(a.status === "pending" && gig.status === "open") && a.status !== "withdrawn" && (
+                    <Link href={`/messages/${a.id}`} className="btn-outline"><MessageCircle className="h-4 w-4" /> Open conversation</Link>
                   )}
                 </div>
               ))}
@@ -154,6 +157,9 @@ export default async function GigPage({ params }: { params: Promise<{ id: string
                   <p className="flex items-center justify-between text-sm">
                     Your application <StatusBadge status={myApplication.status} />
                   </p>
+                  <Link href={`/messages/${myApplication.id}`} className="btn w-full">
+                    <MessageCircle className="h-4 w-4" /> Message the venue
+                  </Link>
                   {myApplication.status === "pending" && (
                     <form action={setApplicationStatus}>
                       <input type="hidden" name="application_id" value={myApplication.id} />

@@ -62,3 +62,35 @@ export interface Application {
   status: ApplicationStatus;
   created_at: string;
 }
+
+export interface Message {
+  id: string;
+  application_id: string;
+  sender_id: string;
+  body: string;
+  created_at: string;
+}
+
+export interface ContactDetails {
+  user_id: string;
+  email: string | null;
+  phone: string | null;
+}
+
+/** A row from the `inbox()` database function. */
+export interface InboxRow {
+  application_id: string;
+  gig_id: string;
+  gig_title: string;
+  starts_at: string;
+  status: ApplicationStatus;
+  other_id: string;
+  other_name: string;
+  other_avatar: string | null;
+  other_color: string | null;
+  other_slug: string | null;
+  last_body: string | null;
+  last_at: string;
+  last_sender: string;
+  unread: number;
+}

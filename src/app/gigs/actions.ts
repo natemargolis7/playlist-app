@@ -74,6 +74,7 @@ export async function setApplicationStatus(formData: FormData) {
   await supabase.from("applications").update({ status }).eq("id", id);
   revalidatePath(`/gigs/${gigId}`);
   revalidatePath("/dashboard");
+  revalidatePath("/messages", "layout");
 }
 
 export async function setGigStatus(formData: FormData) {

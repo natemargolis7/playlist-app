@@ -156,7 +156,7 @@ export default async function DashboardPage() {
         ) : (
           <div className="card divide-y divide-border p-0">
             {apps.map((a) => (
-              <Link key={a.id} href={`/gigs/${a.gigs.id}`} className="flex items-center gap-4 px-5 py-4 transition first:rounded-t-2xl last:rounded-b-2xl hover:bg-card-2">
+              <Link key={a.id} href={`/messages/${a.id}`} className="flex items-center gap-4 px-5 py-4 transition first:rounded-t-2xl last:rounded-b-2xl hover:bg-card-2">
                 <Inbox className="hidden h-5 w-5 text-muted sm:block" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{a.gigs.title}</p>
