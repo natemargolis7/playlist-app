@@ -9,11 +9,12 @@ A marketplace that connects live musicians with paid gigs. Built with Next.js (A
 - **Venues** edit their details and get a public page at `/venues/<id>`.
 - **Gigs.** Venues post paid gigs (`/gigs/new`); everyone can browse open gigs filtered by genre and minimum pay (`/gigs`).
 - **Applications.** Musicians apply with a pitch and can withdraw; venues see applicants on the gig page and accept or decline. Accepting marks the gig filled.
+- **Messages.** Every application is a conversation (`/messages`) between the musician and the venue, updated live through Supabase Realtime, with unread counts in the nav. Once a venue books a musician, each side sees the other's private booking email and phone.
 
 ## Setup
 
 1. Create a Supabase project.
-2. Apply the schema: either `supabase db push` with the Supabase CLI, or paste `supabase/migrations/20261012000000_init.sql` into the SQL editor.
+2. Apply the schema: either `supabase db push` with the Supabase CLI, or paste each file in `supabase/migrations/` into the SQL editor, oldest first. `20261020000000_media_storage.sql` creates the `media` storage bucket used for photo uploads. `20261020010000_messaging.sql` adds conversations and private booking contact details.
 3. Copy `.env.example` to `.env.local` and fill in your project URL and anon key.
 4. `npm install && npm run dev`, then open http://localhost:3000.
 

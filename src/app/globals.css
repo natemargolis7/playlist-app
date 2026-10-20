@@ -1,22 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafaf9;
-  --foreground: #1c1917;
-  --muted: #78716c;
+  --background: #fbfaf8;
+  --foreground: #17151c;
+  --muted: #6f6a78;
   --card: #ffffff;
-  --border: #e7e5e4;
-  --brand: #7c3aed;
+  --card-2: #f4f2f7;
+  --border: #e8e5ee;
+  --brand: #6d28d9;
+  --brand-2: #db2777;
+  --brand-soft: #f1eafe;
+  --ring: #a78bfa;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0c0a09;
-    --foreground: #f5f5f4;
-    --muted: #a8a29e;
-    --card: #1c1917;
-    --border: #292524;
+    --background: #0d0b12;
+    --foreground: #f4f2f8;
+    --muted: #9d97a8;
+    --card: #16131d;
+    --card-2: #1d1926;
+    --border: #2a2534;
     --brand: #a78bfa;
+    --brand-2: #f472b6;
+    --brand-soft: #241b38;
+    --ring: #8b5cf6;
   }
 }
 
@@ -25,33 +33,59 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-card: var(--card);
+  --color-card-2: var(--card-2);
   --color-border: var(--border);
   --color-brand: var(--brand);
+  --color-brand-2: var(--brand-2);
+  --color-brand-soft: var(--brand-soft);
+  /* Fixed deep gradient for filled surfaces with white text, in both themes. */
+  --color-fill: #7c3aed;
+  --color-fill-2: #db2777;
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-heading), var(--font-body), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
 }
 
 @layer components {
   .input {
-    @apply w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand;
+    @apply w-full rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm shadow-xs transition outline-none placeholder:text-muted/70 focus:border-brand focus:ring-4 focus:ring-brand/15;
   }
   .label {
-    @apply mb-1 block text-sm font-medium;
+    @apply mb-1.5 block text-sm font-medium;
   }
   .btn {
-    @apply inline-flex items-center justify-center rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fill to-fill-2 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 transition hover:brightness-110 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60;
   }
   .btn-outline {
-    @apply inline-flex items-center justify-center rounded-lg border border-border px-4 py-2 text-sm font-semibold hover:bg-card;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold transition hover:border-brand/40 hover:bg-card-2 active:scale-[0.98];
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-muted transition hover:bg-card-2 hover:text-foreground;
   }
   .card {
-    @apply rounded-xl border border-border bg-card p-5;
+    @apply rounded-2xl border border-border bg-card p-5 shadow-xs;
+  }
+  .card-hover {
+    @apply transition hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-lg hover:shadow-brand/5;
   }
   .chip {
-    @apply inline-block rounded-full border border-border px-2.5 py-0.5 text-xs;
+    @apply inline-flex items-center gap-1 rounded-full bg-card-2 px-2.5 py-0.5 text-xs font-medium text-muted;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold tracking-widest text-brand uppercase;
+  }
+  .skeleton {
+    @apply animate-pulse rounded-xl bg-card-2;
   }
 }

@@ -1,13 +1,14 @@
 import { redirect } from "next/navigation";
 import { requireSession } from "@/lib/session";
+import { PageHeader } from "@/components/page-header";
 import { GigForm } from "./gig-form";
 
 export default async function NewGigPage() {
   const { profile } = await requireSession();
   if (profile.role !== "venue") redirect("/gigs");
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Post a gig</h1>
+    <div>
+      <PageHeader eyebrow="New gig" title="Post a gig" description="Musicians can apply as soon as it's live." />
       <GigForm />
     </div>
   );
