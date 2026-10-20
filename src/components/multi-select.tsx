@@ -47,6 +47,8 @@ export function MultiSelect({
     else if (!full) set([...values, value]);
     setQuery("");
     setActive(0);
+    // Close after each pick so the list doesn't cover the rest of the form.
+    setOpen(false);
   }
 
   return (
@@ -76,6 +78,7 @@ export function MultiSelect({
             setActive(0);
           }}
           onFocus={() => setOpen(true)}
+          onClick={() => setOpen(true)}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") {
               e.preventDefault();
