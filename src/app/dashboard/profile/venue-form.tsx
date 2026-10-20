@@ -4,6 +4,9 @@ import { useActionState } from "react";
 import { updateVenue, type FormState } from "@/app/dashboard/actions";
 import { FormMessage } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
+import { Combobox } from "@/components/combobox";
+import { ImageDropzone } from "@/components/image-dropzone";
+import { LOCATIONS } from "@/lib/options";
 import type { Venue } from "@/lib/types";
 
 export function VenueForm({ venue }: { venue: Venue }) {
@@ -25,7 +28,7 @@ export function VenueForm({ venue }: { venue: Venue }) {
         </div>
         <div>
           <label className="label" htmlFor="city">City</label>
-          <input className="input" id="city" name="city" defaultValue={venue.city ?? ""} />
+          <Combobox id="city" name="city" options={LOCATIONS} defaultValue={venue.city ?? ""} placeholder="Start typing a city" />
         </div>
         <div>
           <label className="label" htmlFor="capacity">Capacity</label>
@@ -37,8 +40,8 @@ export function VenueForm({ venue }: { venue: Venue }) {
         </div>
       </div>
       <div>
-        <label className="label" htmlFor="logo_url">Logo URL</label>
-        <input className="input" id="logo_url" name="logo_url" type="url" defaultValue={venue.logo_url ?? ""} />
+        <span className="label">Logo</span>
+        <ImageDropzone name="logo_url" userId={venue.id} shape="square" defaultUrl={venue.logo_url} hint="Square works best." />
       </div>
       <FormMessage {...state} />
       <SubmitButton>Save venue</SubmitButton>
