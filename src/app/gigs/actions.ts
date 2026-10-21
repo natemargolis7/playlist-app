@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { requireSession } from "@/lib/session";
 import { dollarsToCents, parseList } from "@/lib/format";
+import { flushNotifications } from "@/lib/notifications";
 
 export type FormState = { error?: string; message?: string };
 
@@ -59,6 +61,7 @@ export async function applyToGig(_prev: FormState, formData: FormData): Promise<
     return { error: error.message };
   }
 
+  after(flushNotifications);
   revalidatePath(`/gigs/${gigId}`);
   return { message: "Application sent!" };
 }
@@ -72,6 +75,7 @@ export async function setApplicationStatus(formData: FormData) {
 
   // RLS + the applications_guard trigger decide who may set which status.
   await supabase.from("applications").update({ status }).eq("id", id);
+  after(flushNotifications);
   revalidatePath(`/gigs/${gigId}`);
   revalidatePath("/dashboard");
   revalidatePath("/messages", "layout");
@@ -84,6 +88,7 @@ export async function setGigStatus(formData: FormData) {
   if (!["open", "filled", "cancelled"].includes(status)) return;
 
   await supabase.from("gigs").update({ status }).eq("id", gigId);
+  after(flushNotifications);
   revalidatePath(`/gigs/${gigId}`);
   revalidatePath("/gigs");
   revalidatePath("/dashboard");

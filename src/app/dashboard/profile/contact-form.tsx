@@ -25,8 +25,15 @@ export function ContactForm({ contact }: { contact: ContactDetails | null }) {
           <input className="input" id="contact_phone" name="contact_phone" type="tel" placeholder="(555) 123-4567" defaultValue={contact?.phone ?? ""} />
         </div>
       </div>
+      <label className="flex items-start gap-3 border-t border-border pt-4 text-sm">
+        <input type="checkbox" name="email_notifications" defaultChecked={contact?.email_notifications ?? true} className="mt-0.5" />
+        <span>
+          <span className="font-semibold">Email me about my gigs</span>
+          <span className="block text-muted">New applicants, bookings, replies and reminders, sent to the email you signed up with.</span>
+        </span>
+      </label>
       <FormMessage {...state} />
-      <SubmitButton className="btn-outline">Save contact details</SubmitButton>
+      <SubmitButton className="btn-outline">Save</SubmitButton>
     </form>
   );
 }

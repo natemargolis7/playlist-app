@@ -4,6 +4,7 @@ import { CalendarX, Globe, MapPin, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { EmptyState } from "@/components/empty-state";
 import { GigCard } from "@/components/gig-card";
+import { ResponseTime } from "@/components/response-time";
 import type { Gig, Venue } from "@/lib/types";
 
 export default async function VenuePage({ params }: { params: Promise<{ id: string }> }) {
@@ -44,6 +45,7 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
                 <Globe className="h-4 w-4" /> Website
               </a>
             )}
+            <ResponseTime venueId={venue.id} />
           </div>
         </div>
       </div>
