@@ -12,7 +12,7 @@ export function ProfileHeader({ musician, compact = false }: { musician: Musicia
         style={{
           background: musician.banner_url
             ? `center / cover no-repeat url("${encodeURI(musician.banner_url)}")`
-            : `radial-gradient(circle at 20% 20%, ${accent}, transparent 60%), linear-gradient(135deg, ${accent}cc, ${accent}33)`,
+            : accent,
         }}
       />
       <div className={compact ? "px-5 pb-5" : "px-6 pb-7 sm:px-8"}>
@@ -21,10 +21,10 @@ export function ProfileHeader({ musician, compact = false }: { musician: Musicia
             name={musician.stage_name || "?"}
             url={musician.avatar_url}
             color={accent}
-            className={`border-4 border-card shadow-lg ${compact ? "h-20 w-20 text-2xl" : "h-28 w-28 text-4xl"}`}
+            className={`border-4 border-card ${compact ? "h-20 w-20 text-2xl" : "h-28 w-28 text-4xl"}`}
           />
           {musician.available && (
-            <span className="mb-2 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold text-white shadow-sm" style={{ background: accent }}>
+            <span className="mb-2 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold text-white" style={{ background: accent }}>
               <CheckCircle2 className="h-3.5 w-3.5" /> Available for bookings
             </span>
           )}

@@ -43,7 +43,7 @@ export async function updateMusician(_prev: FormState, formData: FormData): Prom
   if (!/^[a-z0-9-]{3,40}$/.test(slug))
     return { error: "Profile URL must be 3-40 characters: lowercase letters, numbers and dashes." };
 
-  const accent = String(formData.get("accent_color") ?? "#7c3aed");
+  const accent = String(formData.get("accent_color") ?? "#e0662b");
   const avatarUrl = optional(formData, "avatar_url");
   const bannerUrl = optional(formData, "banner_url");
   if ((avatarUrl && !isHttpUrl(avatarUrl)) || (bannerUrl && !isHttpUrl(bannerUrl)))
@@ -62,7 +62,7 @@ export async function updateMusician(_prev: FormState, formData: FormData): Prom
       rate_cents: dollarsToCents(formData.get("rate")),
       avatar_url: avatarUrl,
       banner_url: bannerUrl,
-      accent_color: /^#[0-9a-fA-F]{6}$/.test(accent) ? accent : "#7c3aed",
+      accent_color: /^#[0-9a-fA-F]{6}$/.test(accent) ? accent : "#e0662b",
       links,
       media_urls: mediaUrls,
       available: formData.get("available") === "on",

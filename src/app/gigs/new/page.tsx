@@ -8,7 +8,7 @@ export default async function NewGigPage() {
   if (profile.role !== "venue") redirect("/gigs");
   return (
     <div>
-      <PageHeader eyebrow="New gig" title="Post a gig" description="Musicians can apply as soon as it's live." />
+      <PageHeader title="Post a gig" description="Musicians can apply as soon as it's live." />
       <GigForm />
     </div>
   );

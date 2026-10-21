@@ -13,7 +13,7 @@ export function GigCard({ gig, venue }: { gig: Gig; venue?: Pick<Venue, "name" |
   return (
     <Link href={`/gigs/${gig.id}`} className="card card-hover group flex gap-4">
       <div className="flex h-16 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-brand-soft text-brand">
-        <span className="text-[11px] font-semibold uppercase">{date.toLocaleString("en-US", { month: "short" })}</span>
+        <span className="text-xs font-semibold">{date.toLocaleString("en-US", { month: "short" })}</span>
         <span className="font-display text-2xl leading-none font-bold">{date.getDate()}</span>
       </div>
       <div className="min-w-0 flex-1">

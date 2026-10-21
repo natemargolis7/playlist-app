@@ -20,7 +20,7 @@ export default async function MusiciansPage({ searchParams }: { searchParams: Pr
 
   return (
     <div>
-      <PageHeader eyebrow="Discover" title="Musicians" description="Bands, solo artists and DJs ready to play your room." />
+      <PageHeader title="Musicians" description="Bands, solo artists and DJs ready to play your room." />
       <FilterBar
         basePath="/musicians"
         values={{ q, genre }}

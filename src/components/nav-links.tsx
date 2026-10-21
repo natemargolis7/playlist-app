@@ -19,7 +19,7 @@ export function NavLinks({ className = "", itemClassName = "" }: { className?: s
             key={href}
             href={href}
             className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
-              active ? "bg-brand-soft text-brand" : "text-muted hover:text-foreground"
+              active ? "text-foreground underline decoration-accent decoration-[3px] underline-offset-[10px]" : "text-muted hover:text-foreground"
             } ${itemClassName}`}
           >
             {label}

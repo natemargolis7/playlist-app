@@ -13,7 +13,7 @@ import { MultiSelect } from "@/components/multi-select";
 import { GENRES, INSTRUMENTS, LOCATIONS } from "@/lib/options";
 import type { Musician } from "@/lib/types";
 
-const PRESET_COLORS = ["#7c3aed", "#db2777", "#ea580c", "#16a34a", "#0891b2", "#2563eb", "#1c1917"];
+const PRESET_COLORS = ["#e0662b", "#c2187a", "#2f6fdf", "#3f7d4e", "#8a5a2b", "#1f2a44", "#161514"];
 
 export function MusicianForm({ musician }: { musician: Musician }) {
   const [state, action] = useActionState<FormState, FormData>(updateMusician, {});
@@ -110,13 +110,13 @@ export function MusicianForm({ musician }: { musician: Musician }) {
             ))}
           </div>
           <Field label="Featured tracks & videos" hint="One YouTube, Spotify or SoundCloud link per line; they're embedded on your profile">
-            <textarea className="input min-h-24 font-mono text-xs" name="media_urls" defaultValue={musician.media_urls.join("\n")} />
+            <textarea className="input min-h-24 text-sm" name="media_urls" defaultValue={musician.media_urls.join("\n")} />
           </Field>
         </section>
 
-        <div className="sticky bottom-4 z-10 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card/90 p-3 shadow-lg backdrop-blur">
+        <div className="sticky bottom-4 z-10 flex flex-wrap items-center gap-3 rounded-2xl bg-floor p-3 text-floor-ink shadow-lg">
           <SubmitButton>Save profile</SubmitButton>
-          <Link href={`/musicians/${musician.slug}`} className="btn-ghost">
+          <Link href={`/musicians/${musician.slug}`} className="btn-ghost text-floor-ink hover:bg-white/10 hover:text-floor-ink">
             <ExternalLink className="h-4 w-4" /> View public profile
           </Link>
           <div className="w-full sm:ml-auto sm:w-auto"><FormMessage {...state} /></div>
@@ -124,8 +124,8 @@ export function MusicianForm({ musician }: { musician: Musician }) {
       </form>
 
       <aside className="space-y-2 lg:sticky lg:top-24 lg:self-start">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted">Live preview</p>
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xl shadow-brand/5">
+        <p className="text-sm font-semibold text-muted">Live preview</p>
+        <div className="overflow-hidden rounded-2xl bg-card">
           <ProfileHeader musician={preview} compact />
         </div>
       </aside>

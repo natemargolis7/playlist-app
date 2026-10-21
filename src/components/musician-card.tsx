@@ -12,7 +12,7 @@ export function MusicianCard({ musician: m }: { musician: Musician }) {
         style={{
           background: m.banner_url
             ? `center / cover no-repeat url("${encodeURI(m.banner_url)}")`
-            : `linear-gradient(135deg, ${m.accent_color}, ${m.accent_color}55)`,
+            : m.accent_color,
         }}
       />
       <div className="px-5 pb-5">

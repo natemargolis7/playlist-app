@@ -1,30 +1,53 @@
 @import "tailwindcss";
 
+/*
+ * Stage palette: bone paper, black stage floor, spike-tape amber.
+ * The amber is a fill only (buttons, badges, the tape); text that needs colour uses --brand.
+ */
 :root {
-  --background: #fbfaf8;
-  --foreground: #17151c;
-  --muted: #6f6a78;
-  --card: #ffffff;
-  --card-2: #f4f2f7;
-  --border: #e8e5ee;
-  --brand: #6d28d9;
-  --brand-2: #db2777;
-  --brand-soft: #f1eafe;
-  --ring: #a78bfa;
+  --background: #ecebe7;
+  --foreground: #161514;
+  --muted: #57534d;
+  --card: #f7f6f2;
+  --card-2: #e2e0da;
+  --border: #d3d0c8;
+  --brand: #7a4f00;
+  --brand-soft: #f3e2b3;
+  --ring: #c98c00;
+  --accent: #f2a900;
+  --accent-strong: #ffbd2e;
+  --accent-ink: #161514;
+  --floor: #161514;
+  --floor-2: #24221f;
+  --floor-ink: #f7f6f2;
+  --field: #d9d5cc;
+
+  --step-small: 0.9375rem;
+  --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.25rem);
+  --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --step-head: clamp(2.25rem, 1.4rem + 3.2vw, 4rem);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-press: 140ms;
+  --t-hover: 180ms;
+  --t-ui: 240ms;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0d0b12;
-    --foreground: #f4f2f8;
-    --muted: #9d97a8;
-    --card: #16131d;
-    --card-2: #1d1926;
-    --border: #2a2534;
-    --brand: #a78bfa;
-    --brand-2: #f472b6;
-    --brand-soft: #241b38;
-    --ring: #8b5cf6;
+    --background: #121110;
+    --foreground: #f1efe9;
+    --muted: #aaa59c;
+    --card: #1d1c1a;
+    --card-2: #282623;
+    --border: #36332f;
+    --brand: #f5bb3c;
+    --brand-soft: #3a2e10;
+    --ring: #f2a900;
+    --floor: #0a0a09;
+    --floor-2: #1d1c1a;
+    --field: #22201d;
   }
 }
 
@@ -36,56 +59,110 @@
   --color-card-2: var(--card-2);
   --color-border: var(--border);
   --color-brand: var(--brand);
-  --color-brand-2: var(--brand-2);
   --color-brand-soft: var(--brand-soft);
-  /* Fixed deep gradient for filled surfaces with white text, in both themes. */
-  --color-fill: #7c3aed;
-  --color-fill-2: #db2777;
-  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-heading), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-floor: var(--floor);
+  --color-floor-ink: var(--floor-ink);
+  /* Ink surface with light text, for badges and sent messages, in both themes. */
+  --color-fill: #161514;
+  --font-sans: var(--font-zilla), Georgia, serif;
+  --font-display: var(--font-zilla), Georgia, serif;
+  /* One small corner everywhere; pills and avatars keep rounded-full. */
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 3px;
+  --radius-xl: 3px;
+  --radius-2xl: 4px;
+  --radius-3xl: 4px;
+}
+
+html {
+  overflow-x: clip;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+  overflow-x: clip;
 }
 
 h1,
 h2,
 h3 {
   font-family: var(--font-display);
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
 
 @layer components {
   .input {
-    @apply w-full rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm shadow-xs transition outline-none placeholder:text-muted/70 focus:border-brand focus:ring-4 focus:ring-brand/15;
+    @apply w-full rounded-lg border border-border bg-card px-3.5 py-2.5 text-[15px] transition outline-none placeholder:text-muted/80 focus:border-foreground focus:ring-4 focus:ring-accent/25;
   }
   .label {
     @apply mb-1.5 block text-sm font-medium;
   }
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fill to-fill-2 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 transition hover:brightness-110 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink transition active:scale-[0.97] disabled:pointer-events-none disabled:opacity-60;
+    transition-duration: var(--t-hover);
   }
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold transition hover:border-brand/40 hover:bg-card-2 active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-card-2 px-4 py-2.5 text-sm font-semibold transition active:scale-[0.97];
   }
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-muted transition hover:bg-card-2 hover:text-foreground;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted transition hover:bg-card-2 hover:text-foreground;
   }
   .card {
-    @apply rounded-2xl border border-border bg-card p-5 shadow-xs;
+    @apply rounded-2xl bg-card p-5;
   }
   .card-hover {
-    @apply transition hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-lg hover:shadow-brand/5;
+    @apply transition hover:bg-white dark:hover:bg-card-2;
   }
   .chip {
     @apply inline-flex items-center gap-1 rounded-full bg-card-2 px-2.5 py-0.5 text-xs font-medium text-muted;
   }
-  .eyebrow {
-    @apply text-xs font-semibold tracking-widest text-brand uppercase;
-  }
   .skeleton {
     @apply animate-pulse rounded-xl bg-card-2;
+  }
+  .link {
+    text-decoration: underline;
+    text-decoration-thickness: 0.07em;
+    text-underline-offset: 0.2em;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    background-color: var(--accent-strong);
+  }
+  .btn-outline:hover {
+    background-color: var(--field);
+  }
+}
+
+/* Entrance for the parts of a section: added by <Reveal />, never hides content without JS. */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-reveal] {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 700ms var(--ease-out),
+      transform 900ms var(--ease-expo);
+    transition-delay: calc(var(--i, 0) * 80ms);
+  }
+  .js [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
   }
 }

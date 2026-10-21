@@ -33,7 +33,7 @@ export default async function GigsPage({
 
   return (
     <div>
-      <PageHeader eyebrow="Find gigs" title="Open gigs" description="Paid live music slots from venues, soonest first." />
+      <PageHeader title="Open gigs" description="Paid live music slots from venues, soonest first." />
       <FilterBar
         basePath="/gigs"
         values={{ genre, min_pay }}

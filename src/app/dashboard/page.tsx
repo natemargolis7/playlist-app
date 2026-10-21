@@ -34,7 +34,7 @@ export default async function DashboardPage() {
 
     return (
       <div className="space-y-8">
-        <PageHeader eyebrow="Venue dashboard" title={`Hi, ${profile.display_name}`}>
+        <PageHeader title={`Hi, ${profile.display_name}`}>
           <div className="flex gap-2">
             <Link href="/dashboard/profile" className="btn-outline"><Pencil className="h-4 w-4" /> Edit venue</Link>
             <Link href="/gigs/new" className="btn"><CalendarPlus className="h-4 w-4" /> Post a gig</Link>
@@ -61,8 +61,8 @@ export default async function DashboardPage() {
                 return (
                   <div key={g.id} className="relative">
                     <GigCard gig={g} />
-                    <span className={`absolute -top-2 right-4 rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-sm ${
-                      waiting ? "bg-fill text-white" : "border border-border bg-card text-muted"
+                    <span className={`absolute -top-2 right-4 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                      waiting ? "bg-accent text-accent-ink" : "bg-card-2 text-muted"
                     }`}>
                       {waiting ? `${waiting} to review` : `${g.applications.length} applicants`}
                     </span>
@@ -104,7 +104,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader eyebrow="Musician dashboard" title={`Hi, ${profile.display_name}`}>
+      <PageHeader title={`Hi, ${profile.display_name}`}>
         <div className="flex flex-wrap gap-2">
           {musician && (
             <Link href={`/musicians/${musician.slug}`} className="btn-outline"><ExternalLink className="h-4 w-4" /> View profile</Link>
@@ -129,7 +129,7 @@ export default async function DashboardPage() {
             <Link href="/dashboard/profile" className="btn-outline"><Pencil className="h-4 w-4" /> Edit profile</Link>
           </div>
           <div className="mt-4 h-2 overflow-hidden rounded-full bg-card-2">
-            <div className="h-full rounded-full bg-gradient-to-r from-fill to-fill-2" style={{ width: `${pct}%` }} />
+            <div className="h-full rounded-full bg-accent" style={{ width: `${pct}%` }} />
           </div>
           <ul className="mt-4 grid gap-2 sm:grid-cols-3">
             {checklist.map(([label, ok]) => (

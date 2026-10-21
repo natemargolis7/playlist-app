@@ -13,7 +13,7 @@ export default async function ProfilePage() {
     const { data } = await supabase.from("musicians").select("*").eq("id", user.id).single();
     return (
       <div>
-        <PageHeader eyebrow="Profile" title="Make it yours" description="Everything here shows on your public profile. The preview updates as you type." />
+        <PageHeader title="Make it yours" description="Everything here shows on your public profile. The preview updates as you type." />
         {data ? <MusicianForm musician={data as Musician} /> : <p>Profile not found.</p>}
         <ContactForm contact={contact as ContactDetails | null} />
       </div>
@@ -23,7 +23,7 @@ export default async function ProfilePage() {
   const { data } = await supabase.from("venues").select("*").eq("id", user.id).single();
   return (
     <div>
-      <PageHeader eyebrow="Venue" title="Your venue" description="Musicians see this when they look at your gigs." />
+      <PageHeader title="Your venue" description="Musicians see this when they look at your gigs." />
       {data ? <VenueForm venue={data as Venue} /> : <p>Venue not found.</p>}
       <ContactForm contact={contact as ContactDetails | null} />
     </div>

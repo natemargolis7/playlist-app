@@ -27,12 +27,11 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
         {venue.logo_url ? (
           <img src={venue.logo_url} alt="" className="h-20 w-20 rounded-2xl object-cover" />
         ) : (
-          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-fill to-fill-2 font-display text-3xl font-bold text-white">
+          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-floor font-display text-3xl font-semibold text-floor-ink">
             {venue.name.slice(0, 1).toUpperCase()}
           </div>
         )}
         <div className="flex-1">
-          <p className="eyebrow mb-1">Venue</p>
           <h1 className="text-3xl font-bold">{venue.name}</h1>
           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
             {(venue.address || venue.city) && (

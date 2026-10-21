@@ -14,7 +14,7 @@ export function Avatar({
   return (
     <div
       className={`flex shrink-0 items-center justify-center rounded-full font-display font-bold text-white ${className}`}
-      style={{ background: `linear-gradient(135deg, ${color}, ${color}bb)` }}
+      style={{ background: color }}
     >
       {name.slice(0, 1).toUpperCase()}
     </div>

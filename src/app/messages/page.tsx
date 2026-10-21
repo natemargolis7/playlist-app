@@ -15,7 +15,7 @@ export default async function MessagesPage() {
 
   return (
     <div>
-      <PageHeader eyebrow="Messages" title="Conversations"
+      <PageHeader title="Conversations"
         description={profile.role === "venue" ? "Every application to your gigs starts a conversation." : "Each gig you apply to has its own conversation with the venue."} />
       {rows.length === 0 ? (
         <EmptyState
@@ -29,7 +29,7 @@ export default async function MessagesPage() {
           {rows.map((r) => (
             <Link key={r.application_id} href={`/messages/${r.application_id}`}
               className="flex items-center gap-4 px-5 py-4 transition first:rounded-t-2xl last:rounded-b-2xl hover:bg-card-2">
-              <Avatar name={r.other_name} url={r.other_avatar} color={r.other_color ?? "#7c3aed"} className="h-11 w-11" />
+              <Avatar name={r.other_name} url={r.other_avatar} color={r.other_color ?? "#161514"} className="h-11 w-11" />
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between gap-3">
                   <p className={`truncate ${r.unread ? "font-bold" : "font-semibold"}`}>{r.other_name}</p>

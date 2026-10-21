@@ -45,10 +45,10 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
   const open = app.status === "pending" || app.status === "accepted";
   const other = isVenue
     ? { name: musician.stage_name, avatar: musician.avatar_url, color: musician.accent_color, href: `/musicians/${musician.slug}` }
-    : { name: venue.name, avatar: venue.logo_url, color: "#7c3aed", href: `/venues/${venue.id}` };
+    : { name: venue.name, avatar: venue.logo_url, color: "#161514", href: `/venues/${venue.id}` };
   const people = {
     [musician.id]: { name: musician.stage_name, avatar: musician.avatar_url, color: musician.accent_color },
-    [venue.id]: { name: venue.name, avatar: venue.logo_url, color: "#7c3aed" },
+    [venue.id]: { name: venue.name, avatar: venue.logo_url, color: "#161514" },
   };
   const c = contact as ContactDetails | null;
 

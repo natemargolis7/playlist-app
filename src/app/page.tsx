@@ -1,183 +1,203 @@
 import Link from "next/link";
-import { ArrowRight, CalendarCheck, Guitar, Mic2, Palette, Search, Send, Store } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { GigCard } from "@/components/gig-card";
-import type { Gig, Venue } from "@/lib/types";
+import { formatMoney } from "@/lib/format";
+import { Setlist, type SetlistGig } from "@/components/landing/setlist";
+import { TapeStripe } from "@/components/tape-stripe";
+import type { Gig, Musician, Venue } from "@/lib/types";
+import "./landing.css";
 
 type GigRow = Gig & { venues: Pick<Venue, "name" | "city"> | null };
 
 export default async function Home() {
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("gigs")
-    .select("*, venues(name, city)")
-    .eq("status", "open")
-    .gte("starts_at", new Date().toISOString())
-    .order("starts_at")
-    .limit(4);
-  const gigs = (data ?? []) as GigRow[];
+  const [{ data: gigData }, { data: musicianData }] = await Promise.all([
+    supabase
+      .from("gigs")
+      .select("*, venues(name, city)")
+      .eq("status", "open")
+      .gte("starts_at", new Date().toISOString())
+      .order("starts_at")
+      .limit(60),
+    supabase.from("musicians").select("*").eq("available", true).order("updated_at", { ascending: false }).limit(6),
+  ]);
+  const gigs = (gigData ?? []) as GigRow[];
+  const musicians = (musicianData ?? []) as Musician[];
+
+  const setlist: SetlistGig[] = gigs.slice(0, 6).map((g) => ({
+    id: g.id,
+    title: g.title,
+    startsAt: g.starts_at,
+    durationMinutes: g.duration_minutes,
+    pay: formatMoney(g.pay_cents),
+    venue: g.venues?.name ?? "A venue",
+    city: g.venues?.city ?? null,
+    genres: g.genres,
+  }));
+
+  const byCity = new Map<string, GigRow[]>();
+  for (const g of gigs) {
+    const city = g.venues?.city || "Other cities";
+    byCity.set(city, [...(byCity.get(city) ?? []), g]);
+  }
+  const cities = [...byCity.entries()].sort((a, b) => b[1].length - a[1].length).slice(0, 8);
 
   return (
-    <div className="space-y-24">
-      <section className="relative -mx-4 -mt-8 overflow-hidden px-4 pt-16 pb-10 sm:-mx-6 sm:-mt-10 sm:px-6 sm:pt-24">
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute -top-40 left-1/2 h-[480px] w-[880px] -translate-x-1/2 rounded-full bg-gradient-to-r from-brand/25 via-brand-2/20 to-brand/10 blur-3xl" />
-        </div>
-        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
-          <div>
-            <p className="eyebrow mb-4 inline-flex items-center gap-2 rounded-full bg-brand-soft px-3 py-1">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand" /> Live music marketplace
+    <div className="landing">
+      {/* The card and the setlist taped to the stage */}
+      <section className="hero bleed">
+        <div className="hero-card">
+          <TapeStripe />
+          <div className="hero-card-body">
+            <p className="hero-wordmark" aria-hidden data-reveal>Playlist</p>
+            <h1 className="hero-title" data-reveal style={{ "--i": 1 } as React.CSSProperties}>Gigs with the fee up front</h1>
+            <p className="hero-lead" data-reveal style={{ "--i": 2 } as React.CSSProperties}>
+              Venues post the date, the set and what they&apos;ll pay. Musicians pitch with a profile that sounds like
+              them, then talk and book in one thread.
             </p>
-            <h1 className="text-5xl leading-[1.05] font-extrabold sm:text-6xl">
-              Book live music.{" "}
-              <span className="bg-gradient-to-r from-fill to-fill-2 bg-clip-text text-transparent">Get paid to play.</span>
-            </h1>
-            <p className="mt-5 max-w-lg text-lg text-muted">
-              Venues post paid gigs. Musicians show off their sound with a profile that&apos;s all theirs, and apply in one
-              click.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/signup?role=musician" className="btn px-5 py-3 text-base">
-                <Guitar className="h-5 w-5" /> I&apos;m a musician
-              </Link>
-              <Link href="/signup?role=venue" className="btn-outline px-5 py-3 text-base">
-                <Store className="h-5 w-5" /> I&apos;m a venue
-              </Link>
-            </div>
-          </div>
-
-          <HeroPreview />
-        </div>
-      </section>
-
-      <section>
-        <div className="mb-10 text-center">
-          <p className="eyebrow mb-2">How it works</p>
-          <h2 className="text-3xl font-bold sm:text-4xl">Two sides, one stage</h2>
-        </div>
-        <div className="grid gap-6 md:grid-cols-2">
-          <Steps
-            icon={Mic2}
-            title="For musicians"
-            steps={[
-              [Palette, "Make it yours", "Pick your colors, genres, rate and links, and embed your best tracks."],
-              [Search, "Find paid work", "Browse open gigs by date, pay and genre."],
-              [Send, "Pitch in one click", "Send a short note and track every application from your dashboard."],
-            ]}
-            cta={{ href: "/signup?role=musician", label: "Create your profile" }}
-          />
-          <Steps
-            icon={Store}
-            title="For venues"
-            steps={[
-              [CalendarCheck, "Post a gig", "Set the date, set length, genre and what you'll pay."],
-              [Search, "Review applicants", "Every applicant comes with a full profile and tracks to hear."],
-              [Guitar, "Book the act", "Accept the right fit and the gig is marked filled automatically."],
-            ]}
-            cta={{ href: "/signup?role=venue", label: "Post your first gig" }}
-          />
-        </div>
-      </section>
-
-      {gigs.length > 0 && (
-        <section>
-          <div className="mb-6 flex items-end justify-between gap-4">
-            <div>
-              <p className="eyebrow mb-2">Happening soon</p>
-              <h2 className="text-3xl font-bold">Open gigs</h2>
-            </div>
-            <Link href="/gigs" className="btn-ghost">
-              See all <ArrowRight className="h-4 w-4" />
+            <Link href="/gigs" className="btn hero-action" data-reveal style={{ "--i": 3 } as React.CSSProperties}>
+              Find a paid gig
             </Link>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {gigs.map((g) => <GigCard key={g.id} gig={g} venue={g.venues} />)}
+          <nav className="hero-links" aria-label="Get started">
+            <Link href="/signup?role=musician" className="link">Join as a musician</Link>
+            <Link href="/signup?role=venue" className="link">Post a gig as a venue</Link>
+          </nav>
+        </div>
+        <div className="hero-floor">
+          <Setlist gigs={setlist} />
+        </div>
+      </section>
+
+      {/* Musicians as slips */}
+      {musicians.length > 0 && (
+        <section className="slips bleed" aria-labelledby="slips-title">
+          <div className="slips-copy">
+            <h2 id="slips-title" data-reveal>Profiles that sound like you</h2>
+            <p data-reveal style={{ "--i": 1 } as React.CSSProperties}>
+              Pick your colour, genres and rate, drag in your photos and embed your best tracks. Every pitch you send
+              carries it.
+            </p>
           </div>
+          <ul className="slips-row">
+            {musicians.map((m, i) => (
+              <li key={m.id} className="slip" data-reveal style={{ "--i": i, "--h": `${[38, 30, 44, 34, 40, 28][i % 6]}svh`, "--tilt": `${[0, -1.5, 0, 1.2, 0, -1][i % 6]}deg`, "--accent-m": m.accent_color } as React.CSSProperties}>
+                <Link href={`/musicians/${m.slug}`} className="slip-link">
+                  <span className="slip-band" aria-hidden />
+                  {m.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- user-uploaded photo from Supabase Storage
+                    <img src={m.avatar_url} alt="" width={56} height={56} loading="lazy" className="slip-photo" />
+                  ) : (
+                    <span className="slip-initial" aria-hidden>{m.stage_name.slice(0, 1)}</span>
+                  )}
+                  <strong className="slip-name">{m.stage_name}</strong>
+                  <span className="slip-cut" aria-hidden>- - - - - - - - - - - -</span>
+                  {m.headline && <span>{m.headline}</span>}
+                  {m.genres.length > 0 && <span>{m.genres.slice(0, 3).join(", ")}</span>}
+                  {m.location && <span>{m.location}</span>}
+                  {m.rate_cents != null && <span>From {formatMoney(m.rate_cents)} a gig</span>}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 
-      <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-fill to-fill-2 px-6 py-14 text-center text-white sm:px-12">
-        <h2 className="text-3xl font-bold sm:text-4xl">Your next gig is one profile away</h2>
-        <p className="mx-auto mt-3 max-w-md text-white/80">Free to join for musicians and venues.</p>
-        <Link href="/signup" className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 font-semibold text-brand shadow-lg transition hover:scale-[1.02]">
-          Get started <ArrowRight className="h-4 w-4" />
-        </Link>
+      {/* The booking as a run sheet */}
+      <section className="runsheet bleed" aria-labelledby="run-title">
+        <div className="runsheet-copy">
+          <h2 id="run-title" data-reveal>From pitch to booked</h2>
+          <p data-reveal style={{ "--i": 1 } as React.CSSProperties}>
+            Every gig has one thread between the venue and each musician who pitched. Phone numbers stay private until
+            the venue says yes.
+          </p>
+        </div>
+        <div className="runsheet-slip" data-reveal style={{ "--i": 2 } as React.CSSProperties}>
+          <RunGroup title="The venue posts" rows={[["Date, set length and genres", "on the gig"], ["The fee", "up front"]]} />
+          <RunGroup title="You pitch" rows={[["A short note with your profile", "one click"], ["Your tracks, ready to play", "embedded"]]} />
+          <RunGroup title="You talk" rows={[["Questions, set lists, load-in", "in the thread"], ["Replies arrive as they're sent", "live"]]} />
+          <RunGroup title="You're booked" rows={[["Venue accepts, gig marked filled", "one click"], ["Email and phone shared", "both sides"]]} />
+          <p className="runsheet-total">
+            <span>On the bill, with each other&apos;s number</span>
+            <span>Free</span>
+          </p>
+        </div>
+      </section>
+
+      {/* Open gigs by city */}
+      <section className="open bleed" aria-labelledby="open-title">
+        <div className="open-list">
+          <h2 id="open-title" className="open-word" data-reveal>Open</h2>
+          {cities.length > 0 ? (
+            <div className="open-bars">
+              {cities.map(([city, list], i) => (
+                <details key={city} className="open-bar" open={i === 0} data-reveal style={{ "--i": i } as React.CSSProperties}>
+                  <summary>
+                    <span>{city}</span>
+                    <span className="open-count">{list.length} {list.length === 1 ? "gig" : "gigs"}</span>
+                  </summary>
+                  <ul>
+                    {list.map((g) => (
+                      <li key={g.id}>
+                        <Link href={`/gigs/${g.id}`} className="open-gig">
+                          <span>
+                            <strong>{g.title}</strong>
+                            <span className="open-meta">
+                              {g.venues?.name} · {new Date(g.starts_at).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                            </span>
+                          </span>
+                          <span className="open-pay">{formatMoney(g.pay_cents)}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              ))}
+            </div>
+          ) : (
+            <p className="open-empty">No open gigs right now. Venues, the first post is yours.</p>
+          )}
+        </div>
+        <div className="open-side" data-reveal>
+          <p className="open-figure">
+            {gigs.length > 0
+              ? `${gigs.length} paid ${gigs.length === 1 ? "gig" : "gigs"} open in ${byCity.size} ${byCity.size === 1 ? "city" : "cities"}.`
+              : "No open gigs yet."}
+          </p>
+          <p>Each one shows the fee, the date and the length of the set before you pitch. Open a city to see them.</p>
+          <div className="open-actions">
+            <Link href="/gigs" className="btn">See every gig</Link>
+            <Link href="/gigs/new" className="btn-outline">Post a gig</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* The reply card */}
+      <section className="reply bleed" aria-labelledby="reply-title">
+        <p className="reply-note" data-reveal>
+          Free for musicians and venues. Make a profile tonight and it&apos;s ready for the next gig that goes up.
+        </p>
+        <div className="reply-card" data-reveal style={{ "--i": 1 } as React.CSSProperties}>
+          <h2 id="reply-title">Get on the bill</h2>
+          <p>Pick your colours, add your tracks, and pitch the gigs that pay what you&apos;re worth.</p>
+          <Link href="/signup?role=musician" className="reply-action">Create a musician profile</Link>
+          <Link href="/signup?role=venue" className="link reply-venue">Booking a room? Sign up as a venue</Link>
+        </div>
       </section>
     </div>
   );
 }
 
-function Steps({
-  icon: Icon,
-  title,
-  steps,
-  cta,
-}: {
-  icon: typeof Mic2;
-  title: string;
-  steps: [typeof Mic2, string, string][];
-  cta: { href: string; label: string };
-}) {
+function RunGroup({ title, rows }: { title: string; rows: [string, string][] }) {
   return (
-    <div className="card p-7">
-      <div className="mb-6 flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand">
-          <Icon className="h-5 w-5" />
-        </span>
-        <h3 className="text-xl font-bold">{title}</h3>
-      </div>
-      <ol className="space-y-5">
-        {steps.map(([StepIcon, heading, body], i) => (
-          <li key={heading} className="flex gap-4">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border text-sm font-semibold text-muted">
-              {i + 1}
-            </span>
-            <div>
-              <p className="flex items-center gap-2 font-semibold">
-                <StepIcon className="h-4 w-4 text-brand" /> {heading}
-              </p>
-              <p className="text-sm text-muted">{body}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
-      <Link href={cta.href} className="btn-outline mt-7">
-        {cta.label} <ArrowRight className="h-4 w-4" />
-      </Link>
-    </div>
-  );
-}
-
-/** Illustrative profile + gig cards; not real data. */
-function HeroPreview() {
-  return (
-    <div aria-hidden className="relative mx-auto w-full max-w-sm select-none sm:mb-16 lg:max-w-none">
-      <div className="card overflow-hidden p-0 shadow-2xl shadow-brand/10">
-        <div className="h-24 bg-gradient-to-br from-[#f97316] to-[#db2777]" />
-        <div className="px-5 pb-5">
-          <div className="-mt-8 flex h-16 w-16 items-center justify-center rounded-full border-4 border-card bg-[#ea580c] font-display text-2xl font-bold text-white">
-            M
-          </div>
-          <p className="mt-2 font-display text-xl font-bold">Marigold Trio</p>
-          <p className="text-sm text-muted">Soul &amp; funk for late-night sets</p>
-          <div className="mt-3 flex gap-1.5">
-            {["soul", "funk", "jazz"].map((g) => (
-              <span key={g} className="rounded-full border border-[#ea580c]/40 px-2.5 py-0.5 text-xs text-[#ea580c]">{g}</span>
-            ))}
-          </div>
-        </div>
-      </div>
-      <div className="card absolute -right-4 -bottom-16 hidden w-64 rotate-[-3deg] shadow-xl sm:block lg:-right-4">
-        <p className="text-xs text-muted">The Blue Room · Austin</p>
-        <p className="font-semibold">Friday jazz residency</p>
-        <div className="mt-2 flex items-center justify-between text-sm">
-          <span className="text-muted">Fri, 8:00 PM</span>
-          <span className="font-semibold text-brand">$450</span>
-        </div>
-      </div>
-      <div className="absolute -top-4 right-3 rotate-[4deg] sm:-right-2 rounded-xl bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white shadow-lg">
-        ✓ Booked
-      </div>
+    <div className="runsheet-group" data-reveal>
+      <h3>{title}</h3>
+      {rows.map(([what, value]) => (
+        <p key={what} className="runsheet-row">
+          <span>{what}</span>
+          <span className="runsheet-dots" aria-hidden />
+          <span>{value}</span>
+        </p>
+      ))}
     </div>
   );
 }
