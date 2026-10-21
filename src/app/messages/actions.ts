@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { flushNotifications } from "@/lib/notifications";
 import { requireSession } from "@/lib/session";
 import type { Message } from "@/lib/types";
 
@@ -18,6 +20,7 @@ export async function sendMessage(applicationId: string, body: string): Promise<
   // RLS rejects senders who aren't in the conversation, or conversations that are closed.
   if (error) return { error: error.code === "42501" ? "This conversation is closed." : error.message };
 
+  after(flushNotifications);
   await markRead(applicationId);
   return { message: data as Message };
 }
@@ -36,14 +39,15 @@ export async function updateContact(_prev: ContactState, formData: FormData): Pr
   const { supabase, user } = await requireSession();
   const email = String(formData.get("contact_email") ?? "").trim();
   const phone = String(formData.get("contact_phone") ?? "").trim();
+  const emailNotifications = formData.get("email_notifications") === "on";
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Enter a valid email address." };
   if (phone && !/^[\d\s()+.-]{7,20}$/.test(phone)) return { error: "Enter a valid phone number." };
 
   const { error } = await supabase
     .from("contact_details")
-    .upsert({ user_id: user.id, email: email || null, phone: phone || null });
+    .upsert({ user_id: user.id, email: email || null, phone: phone || null, email_notifications: emailNotifications });
   if (error) return { error: error.message };
 
   revalidatePath("/dashboard/profile");
-  return { message: "Contact details saved." };
+  return { message: "Saved." };
 }

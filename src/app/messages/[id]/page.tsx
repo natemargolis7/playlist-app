@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, Lock, Mail, Phone, Wallet } from "lucide-react";
 import { requireSession } from "@/lib/session";
-import { formatDate, formatMoney } from "@/lib/format";
+import { applicationStatus, formatDate, formatMoney } from "@/lib/format";
 import type { Application, ContactDetails, Gig, Message, Musician, Venue } from "@/lib/types";
 import { setApplicationStatus } from "@/app/gigs/actions";
 import { Avatar } from "@/components/avatar";
@@ -42,7 +42,16 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
     .from("conversation_reads")
     .upsert({ application_id: id, user_id: user.id, last_read_at: new Date().toISOString() });
 
-  const open = app.status === "pending" || app.status === "accepted";
+  const status = applicationStatus(app);
+  const open = status === "pending" || status === "accepted";
+  const closedReasons: Record<string, string> = {
+    expired: `${venue.name} didn't answer in time, so this application and conversation are closed.`,
+    gig_filled: "The gig was filled, so this conversation is closed.",
+    gig_cancelled: "The gig was cancelled, so this conversation is closed.",
+    declined: "This application was declined, so the conversation is closed.",
+    withdrawn: "This application was withdrawn, so the conversation is closed.",
+  };
+  const closedReason = closedReasons[status === "expired" ? "expired" : (app.closed_reason ?? app.status)];
   const other = isVenue
     ? { name: musician.stage_name, avatar: musician.avatar_url, color: musician.accent_color, href: `/musicians/${musician.slug}` }
     : { name: venue.name, avatar: venue.logo_url, color: "#7c3aed", href: `/venues/${venue.id}` };
@@ -63,7 +72,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
               <Link href={other.href} className="font-semibold hover:underline">{other.name}</Link>
               <p className="truncate text-xs text-muted">{app.gigs.title}</p>
             </div>
-            <StatusBadge status={app.status} />
+            <StatusBadge status={status} />
           </header>
           <Chat
             applicationId={id}
@@ -71,7 +80,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
             people={people}
             pitch={app.message ? { body: app.message, sender_id: musician.id, created_at: app.created_at } : null}
             initial={(messages ?? []) as Message[]}
-            closedReason={open ? null : app.status === "declined" ? "This application was declined, so the conversation is closed." : "This application was withdrawn, so the conversation is closed."}
+            closedReason={open ? null : closedReason}
           />
         </section>
 
@@ -81,7 +90,12 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
             <Link href={`/gigs/${app.gigs.id}`} className="block font-display text-lg font-bold hover:underline">{app.gigs.title}</Link>
             <p className="flex items-center gap-2 text-sm text-muted"><CalendarDays className="h-4 w-4" /> {formatDate(app.gigs.starts_at)}</p>
             <p className="flex items-center gap-2 text-sm text-muted"><Wallet className="h-4 w-4" /> {formatMoney(app.gigs.pay_cents)}</p>
-            {isVenue && app.status === "pending" && app.gigs.status === "open" && (
+            {status === "pending" && (
+              <p className="text-sm text-muted">
+                {isVenue ? `Answer by ${formatDate(app.respond_by)}, or this application closes automatically.` : `${venue.name} has until ${formatDate(app.respond_by)} to answer.`}
+              </p>
+            )}
+            {isVenue && status === "pending" && app.gigs.status === "open" && (
               <form action={setApplicationStatus} className="flex gap-2 pt-2">
                 <input type="hidden" name="application_id" value={app.id} />
                 <input type="hidden" name="gig_id" value={app.gigs.id} />

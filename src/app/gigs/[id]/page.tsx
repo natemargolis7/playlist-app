@@ -2,11 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, Clock, Inbox, MapPin, MessageCircle, Wallet } from "lucide-react";
 import { getSession } from "@/lib/session";
-import { formatDate, formatMoney } from "@/lib/format";
+import { applicationStatus, formatDate, formatMoney } from "@/lib/format";
 import type { Application, Gig, Musician, Venue } from "@/lib/types";
 import { setApplicationStatus, setGigStatus } from "@/app/gigs/actions";
 import { Avatar } from "@/components/avatar";
 import { EmptyState } from "@/components/empty-state";
+import { ResponseTime } from "@/components/response-time";
 import { StatusBadge } from "@/components/status-badge";
 import { ApplyForm } from "./apply-form";
 
@@ -48,6 +49,12 @@ export default async function GigPage({ params }: { params: Promise<{ id: string
     { icon: MapPin, label: "Where", value: [gig.venues.name, gig.venues.city].filter(Boolean).join(", ") },
   ].filter(Boolean) as { icon: typeof Clock; label: string; value: string }[];
 
+  const CLOSED_REASONS = {
+    expired: `${gig.venues.name} didn't answer in time, so this application closed.`,
+    gig_filled: "Closed because the gig was filled.",
+    gig_cancelled: "Closed because the gig was cancelled.",
+  };
+
   return (
     <div>
       <Link href={isOwner ? "/dashboard" : "/gigs"} className="btn-ghost -ml-3 mb-4">
@@ -62,6 +69,7 @@ export default async function GigPage({ params }: { params: Promise<{ id: string
                 {gig.venues.name}
               </Link>
               {gig.status !== "open" && <StatusBadge status={gig.status} />}
+              <ResponseTime venueId={gig.venue_id} className="text-sm text-muted" />
             </div>
             <h1 className="text-4xl font-bold">{gig.title}</h1>
             {gig.genres.length > 0 && (
@@ -95,35 +103,45 @@ export default async function GigPage({ params }: { params: Promise<{ id: string
               {applicants.length === 0 && (
                 <EmptyState icon={Inbox} title="No applications yet" body="Musicians who apply will show up here with their profiles." />
               )}
-              {applicants.map((a) => (
-                <div key={a.id} className="card space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Avatar name={a.musicians.stage_name} url={a.musicians.avatar_url} color={a.musicians.accent_color} className="h-11 w-11" />
-                    <div className="min-w-0 flex-1">
-                      <Link href={`/musicians/${a.musicians.slug}`} className="font-semibold hover:underline">
-                        {a.musicians.stage_name}
-                      </Link>
-                      {a.musicians.headline && <p className="truncate text-sm text-muted">{a.musicians.headline}</p>}
+              {applicants.map((a) => {
+                const status = applicationStatus(a);
+                const actionable = status === "pending" && gig.status === "open";
+                return (
+                  <div key={a.id} className="card space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Avatar name={a.musicians.stage_name} url={a.musicians.avatar_url} color={a.musicians.accent_color} className="h-11 w-11" />
+                      <div className="min-w-0 flex-1">
+                        <Link href={`/musicians/${a.musicians.slug}`} className="font-semibold hover:underline">
+                          {a.musicians.stage_name}
+                        </Link>
+                        {a.musicians.headline && <p className="truncate text-sm text-muted">{a.musicians.headline}</p>}
+                      </div>
+                      <StatusBadge status={status} />
                     </div>
-                    <StatusBadge status={a.status} />
+                    {actionable && (
+                      <p className="text-sm text-muted">Answer by {formatDate(a.respond_by)}, or this application closes automatically.</p>
+                    )}
+                    {a.closed_reason === "expired" && (
+                      <p className="text-sm text-muted">You didn&apos;t answer by {formatDate(a.respond_by)}, so this application closed.</p>
+                    )}
+                    {a.message && (
+                      <p className="rounded-xl bg-card-2 px-4 py-3 text-sm whitespace-pre-line">{a.message}</p>
+                    )}
+                    {actionable && (
+                      <form action={setApplicationStatus} className="flex gap-2">
+                        <input type="hidden" name="application_id" value={a.id} />
+                        <input type="hidden" name="gig_id" value={gig.id} />
+                        <button name="status" value="accepted" className="btn">Accept</button>
+                        <button name="status" value="declined" className="btn-outline">Decline</button>
+                        <Link href={`/messages/${a.id}`} className="btn-ghost ml-auto"><MessageCircle className="h-4 w-4" /> Message</Link>
+                      </form>
+                    )}
+                    {!actionable && a.status !== "withdrawn" && (
+                      <Link href={`/messages/${a.id}`} className="btn-outline"><MessageCircle className="h-4 w-4" /> Open conversation</Link>
+                    )}
                   </div>
-                  {a.message && (
-                    <p className="rounded-xl bg-card-2 px-4 py-3 text-sm whitespace-pre-line">{a.message}</p>
-                  )}
-                  {a.status === "pending" && gig.status === "open" && (
-                    <form action={setApplicationStatus} className="flex gap-2">
-                      <input type="hidden" name="application_id" value={a.id} />
-                      <input type="hidden" name="gig_id" value={gig.id} />
-                      <button name="status" value="accepted" className="btn">Accept</button>
-                      <button name="status" value="declined" className="btn-outline">Decline</button>
-                      <Link href={`/messages/${a.id}`} className="btn-ghost ml-auto"><MessageCircle className="h-4 w-4" /> Message</Link>
-                    </form>
-                  )}
-                  {!(a.status === "pending" && gig.status === "open") && a.status !== "withdrawn" && (
-                    <Link href={`/messages/${a.id}`} className="btn-outline"><MessageCircle className="h-4 w-4" /> Open conversation</Link>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </section>
           )}
         </article>
@@ -144,6 +162,9 @@ export default async function GigPage({ params }: { params: Promise<{ id: string
                     {gig.status === "open" && <button name="status" value="filled" className="btn-outline">Mark filled</button>}
                     {gig.status !== "cancelled" && <button name="status" value="cancelled" className="btn-ghost text-red-600">Cancel gig</button>}
                   </form>
+                  {gig.status === "open" && (
+                    <p className="mt-3 text-xs text-muted">Filling or cancelling the gig closes any pending applications and lets those musicians know.</p>
+                  )}
                 </>
               ) : !user ? (
                 <>
@@ -155,12 +176,18 @@ export default async function GigPage({ params }: { params: Promise<{ id: string
               ) : myApplication ? (
                 <div className="space-y-3">
                   <p className="flex items-center justify-between text-sm">
-                    Your application <StatusBadge status={myApplication.status} />
+                    Your application <StatusBadge status={applicationStatus(myApplication)} />
                   </p>
+                  {applicationStatus(myApplication) === "pending" && (
+                    <p className="text-sm text-muted">
+                      {gig.venues.name} has until {formatDate(myApplication.respond_by)} to answer. If they don&apos;t, the application closes and you&apos;ll get an email.
+                    </p>
+                  )}
+                  {myApplication.closed_reason && <p className="text-sm text-muted">{CLOSED_REASONS[myApplication.closed_reason]}</p>}
                   <Link href={`/messages/${myApplication.id}`} className="btn w-full">
                     <MessageCircle className="h-4 w-4" /> Message the venue
                   </Link>
-                  {myApplication.status === "pending" && (
+                  {applicationStatus(myApplication) === "pending" && (
                     <form action={setApplicationStatus}>
                       <input type="hidden" name="application_id" value={myApplication.id} />
                       <input type="hidden" name="gig_id" value={gig.id} />
@@ -170,7 +197,8 @@ export default async function GigPage({ params }: { params: Promise<{ id: string
                 </div>
               ) : gig.status === "open" ? (
                 <>
-                  <p className="mb-3 text-sm font-semibold">Apply for this gig</p>
+                  <p className="mb-1 text-sm font-semibold">Apply for this gig</p>
+                  <p className="mb-3 text-sm text-muted">Venues answer within 5 days, or the application closes so you can move on.</p>
                   <ApplyForm gigId={gig.id} />
                 </>
               ) : (

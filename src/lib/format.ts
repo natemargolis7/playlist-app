@@ -49,3 +49,17 @@ export function timeAgo(iso: string) {
   if (days < 7) return `${days}d`;
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(iso));
 }
+
+/** Badge label for an application: "expired" once the venue's deadline passes, even before the sweep closes it. */
+export function applicationStatus(a: { status: string; respond_by: string; closed_reason: string | null }) {
+  if (a.closed_reason === "expired") return "expired";
+  if (a.status === "pending" && new Date(a.respond_by).getTime() <= Date.now()) return "expired";
+  return a.status;
+}
+
+/** 0.4 -> "under an hour", 5 -> "about 5 hours", 50 -> "about 2 days" */
+export function formatDuration(hours: number) {
+  if (hours < 1) return "under an hour";
+  if (hours < 36) return `about ${Math.round(hours)} hour${Math.round(hours) === 1 ? "" : "s"}`;
+  return `about ${Math.round(hours / 24)} days`;
+}

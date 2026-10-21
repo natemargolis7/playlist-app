@@ -6,6 +6,7 @@ const STYLES: Record<string, string> = {
   declined: "bg-red-500/10 text-red-700 dark:text-red-300",
   cancelled: "bg-red-500/10 text-red-700 dark:text-red-300",
   withdrawn: "bg-card-2 text-muted",
+  expired: "bg-card-2 text-muted",
 };
 
 export function StatusBadge({ status }: { status: string }) {

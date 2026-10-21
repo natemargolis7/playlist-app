@@ -61,6 +61,11 @@ export interface Application {
   message: string | null;
   status: ApplicationStatus;
   created_at: string;
+  /** Venues must accept or decline by this time, or the application closes as expired. */
+  respond_by: string;
+  decided_at: string | null;
+  /** Set when the system closed the application rather than the venue declining it. */
+  closed_reason: "expired" | "gig_filled" | "gig_cancelled" | null;
 }
 
 export interface Message {
@@ -75,6 +80,7 @@ export interface ContactDetails {
   user_id: string;
   email: string | null;
   phone: string | null;
+  email_notifications: boolean;
 }
 
 /** A row from the `inbox()` database function. */

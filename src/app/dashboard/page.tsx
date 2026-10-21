@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CalendarPlus, Check, ExternalLink, Inbox, Pencil, Search, Send } from "lucide-react";
 import { requireSession } from "@/lib/session";
-import { formatDate, formatMoney } from "@/lib/format";
+import { applicationStatus, formatDate, formatMoney } from "@/lib/format";
 import type { Application, Gig, Musician, Venue } from "@/lib/types";
 import { EmptyState } from "@/components/empty-state";
 import { GigCard } from "@/components/gig-card";
@@ -115,7 +115,7 @@ export default async function DashboardPage() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Stat label="Applications sent" value={apps.length} />
-        <Stat label="Waiting to hear back" value={apps.filter((a) => a.status === "pending").length} />
+        <Stat label="Waiting to hear back" value={apps.filter((a) => applicationStatus(a) === "pending").length} />
         <Stat label="Gigs booked" value={apps.filter((a) => a.status === "accepted").length} />
       </div>
 
@@ -163,7 +163,7 @@ export default async function DashboardPage() {
                   <p className="truncate text-sm text-muted">{a.gigs.venues.name} · {formatDate(a.gigs.starts_at)}</p>
                 </div>
                 <span className="hidden font-semibold sm:block">{formatMoney(a.gigs.pay_cents)}</span>
-                <StatusBadge status={a.status} />
+                <StatusBadge status={applicationStatus(a)} />
               </Link>
             ))}
           </div>
